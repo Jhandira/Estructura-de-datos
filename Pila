@@ -1,0 +1,93 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Proceso {
+    int id;
+    string nombre;
+    int prioridad;
+    Proceso* siguiente;
+};
+
+Proceso* tope = NULL;
+
+void push() {
+    Proceso* nuevo = new Proceso();
+
+    cout << "ID del proceso: ";
+    cin >> nuevo->id;
+
+    cout << "Nombre del proceso: ";
+    cin >> ws; // limpia espacios en blanco antes de getline
+    getline(cin, nuevo->nombre); // ahora podemos usar espacios en el nombre
+
+    cout << "Prioridad del proceso: ";
+    cin >> nuevo->prioridad;
+
+    nuevo->siguiente = tope;
+    tope = nuevo;
+
+    cout << "Proceso agregado a la pila.\n";
+}
+
+void pop() {
+    if (tope == NULL) {
+        cout << "La pila esta vacia.\n";
+        return;
+    }
+
+    Proceso* temp = tope;
+    tope = tope->siguiente;
+    cout << "Proceso con ID " << temp->id << " eliminado.\n";
+    delete temp;
+}
+
+void mostrarTope() {
+    if (tope == NULL) {
+        cout << "La pila esta vacia.\n";
+        return;
+    }
+
+    cout << "Proceso en la cima:\n";
+    cout << "ID: " << tope->id << ", Nombre: " << tope->nombre << ", Prioridad: " << tope->prioridad << "\n";
+}
+
+void mostrarPila() {
+    if (tope == NULL) {
+        cout << "La pila esta vacia.\n";
+        return;
+    }
+
+    Proceso* temp = tope;
+    while (temp != NULL) {
+        cout << "ID: " << temp->id << ", Nombre: " << temp->nombre << ", Prioridad: " << temp->prioridad << "\n";
+        temp = temp->siguiente;
+    }
+}
+
+void menu() {
+    int opcion;
+    do {
+        cout << "\n--- GESTION DE PILA DE PROCESOS ---\n";
+        cout << "1. Insertar proceso (push)\n";
+        cout << "2. Eliminar proceso (pop)\n";
+        cout << "3. Mostrar cima (peek)\n";
+        cout << "4. Mostrar todos los procesos\n";
+        cout << "5. Salir\n";
+        cout << "Opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1: push(); break;
+            case 2: pop(); break;
+            case 3: mostrarTope(); break;
+            case 4: mostrarPila(); break;
+            case 5: cout << "Saliendo...\n"; break;
+            default: cout << "Opción inválida.\n";
+        }
+    } while (opcion != 5);
+}
+
+int main() {
+    menu();
+}

@@ -1,66 +1,62 @@
 #include <iostream>
-#include <string>
 using namespace std;
 
-struct Proceso {
-    int id;
-    string nombre;
-    int prioridad;
-    Proceso* siguiente;
+struct BloqueMemoria {
+    int direccion; // dirección simulada
+    int tamano;    // tamaño del bloque en KB o MB
+    BloqueMemoria* siguiente;
 };
 
-Proceso* tope = NULL;
+BloqueMemoria* tope = NULL;
+int contadorDireccion = 1000; // dirección base simulada
 
-void push() {
-    Proceso* nuevo = new Proceso();
+void asignarMemoria() {
+    BloqueMemoria* nuevo = new BloqueMemoria();
 
-    cout << "ID del proceso: ";
-    cin >> nuevo->id;
+    cout << "Tamaño del bloque a asignar (en KB): ";
+    cin >> nuevo->tamano;
 
-    cout << "Nombre del proceso: ";
-    cin >> ws; // limpia espacios en blanco antes de getline
-    getline(cin, nuevo->nombre); // ahora podemos usar espacios en el nombre
-
-    cout << "Prioridad del proceso: ";
-    cin >> nuevo->prioridad;
+    nuevo->direccion = contadorDireccion;
+    contadorDireccion += nuevo->tamano; // simulamos avance de dirección
 
     nuevo->siguiente = tope;
     tope = nuevo;
 
-    cout << "Proceso agregado a la pila.\n";
+    cout << "Bloque de memoria asignado. Dirección: " << nuevo->direccion << "\n";
 }
 
-void pop() {
+void liberarMemoria() {
     if (tope == NULL) {
-        cout << "La pila esta vacia.\n";
+        cout << "No hay memoria asignada para liberar.\n";
         return;
     }
 
-    Proceso* temp = tope;
+    BloqueMemoria* temp = tope;
     tope = tope->siguiente;
-    cout << "Proceso con ID " << temp->id << " eliminado.\n";
+    cout << "Memoria en dirección " << temp->direccion << " liberada.\n";
     delete temp;
 }
 
 void mostrarTope() {
     if (tope == NULL) {
-        cout << "La pila esta vacia.\n";
+        cout << "No hay memoria asignada.\n";
         return;
     }
 
-    cout << "Proceso en la cima:\n";
-    cout << "ID: " << tope->id << ", Nombre: " << tope->nombre << ", Prioridad: " << tope->prioridad << "\n";
+    cout << "Bloque en la cima de la pila:\n";
+    cout << "Dirección: " << tope->direccion << ", Tamaño: " << tope->tamano << " KB\n";
 }
 
 void mostrarPila() {
     if (tope == NULL) {
-        cout << "La pila esta vacia.\n";
+        cout << "No hay memoria asignada.\n";
         return;
     }
 
-    Proceso* temp = tope;
+    BloqueMemoria* temp = tope;
+    cout << "--- Bloques de memoria asignados ---\n";
     while (temp != NULL) {
-        cout << "ID: " << temp->id << ", Nombre: " << temp->nombre << ", Prioridad: " << temp->prioridad << "\n";
+        cout << "Dirección: " << temp->direccion << ", Tamaño: " << temp->tamano << " KB\n";
         temp = temp->siguiente;
     }
 }
@@ -68,21 +64,21 @@ void mostrarPila() {
 void menu() {
     int opcion;
     do {
-        cout << "\n--- GESTION DE PILA DE PROCESOS ---\n";
-        cout << "1. Insertar proceso (push)\n";
-        cout << "2. Eliminar proceso (pop)\n";
-        cout << "3. Mostrar cima (peek)\n";
-        cout << "4. Mostrar todos los procesos\n";
+        cout << "\n--- GESTOR DE MEMORIA (PILA) ---\n";
+        cout << "1. Asignar memoria (push)\n";
+        cout << "2. Liberar memoria (pop)\n";
+        cout << "3. Ver cima de la pila\n";
+        cout << "4. Ver todos los bloques asignados\n";
         cout << "5. Salir\n";
-        cout << "Opcion: ";
+        cout << "Opción: ";
         cin >> opcion;
 
         switch (opcion) {
-            case 1: push(); break;
-            case 2: pop(); break;
+            case 1: asignarMemoria(); break;
+            case 2: liberarMemoria(); break;
             case 3: mostrarTope(); break;
             case 4: mostrarPila(); break;
-            case 5: cout << "Saliendo...\n"; break;
+            case 5: cout << "Saliendo del gestor...\n"; break;
             default: cout << "Opción inválida.\n";
         }
     } while (opcion != 5);

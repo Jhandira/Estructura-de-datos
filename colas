@@ -1,0 +1,196 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Estructura de un proceso
+struct Proceso {
+    int id;
+    string nombre;
+    string estado;
+    int prioridad;
+    Proceso* siguiente;  // Puntero al siguiente proceso en la cola
+
+    Proceso() : id(0), nombre(""), estado("En espera"), prioridad(0), siguiente(NULL) {}
+};
+
+// Estructura de la cola de procesos
+struct ColaProcesos {
+    Proceso* frente;  // Primer elemento de la cola
+    Proceso* final;   // Último elemento de la cola
+    int cantidad;     // Cantidad de procesos en la cola
+
+    ColaProcesos() : frente(NULL), final(NULL), cantidad(0) {}
+};
+
+// *Funciones para manejar la cola:*
+
+// 1. Crear un nuevo proceso
+Proceso* CrearProceso(int id) {
+    Proceso* nuevo = new Proceso();
+    nuevo->id = id;
+    
+    cout << "Nombre del proceso: ";
+    getline(cin >> ws, nuevo->nombre);
+    
+    cout << "Prioridad (1-5): ";
+    cin >> nuevo->prioridad;
+    while (nuevo->prioridad < 1 || nuevo->prioridad > 5) {
+        cout << "Prioridad inválida. Ingrese 1-5: ";
+        cin >> nuevo->prioridad;
+    }
+    
+    nuevo->estado = "En espera";
+    nuevo->siguiente = NULL;
+    return nuevo;
+}
+
+// 2. Mostrar un proceso
+void MostrarProceso(Proceso* p) {
+    if (p == NULL) {
+        cout << "Proceso no existe.\n";
+        return;
+    }
+    cout << "\nID: " << p->id 
+         << "\nNombre: " << p->nombre 
+         << "\nEstado: " << p->estado
+         << "\nPrioridad: " << p->prioridad << "\n";
+}
+
+// 3. Encolar un proceso (agregar al final)
+void EncolarProceso(ColaProcesos &cola, Proceso* nuevo) {
+    if (cola.frente == NULL) {  // Si la cola está vacía
+        cola.frente = cola.final = nuevo;
+    } else {  // Si ya hay elementos
+        cola.final->siguiente = nuevo;
+        cola.final = nuevo;
+    }
+    cola.cantidad++;
+    cout << "Proceso encolado correctamente.\n";
+}
+
+// 4. Desencolar un proceso (eliminar del frente)
+Proceso* DesencolarProceso(ColaProcesos &cola) {
+    if (cola.frente == NULL) {
+        cout << "Error: Cola vacía.\n";
+        return NULL;
+    }
+    
+    Proceso* temp = cola.frente;  // Guardamos el proceso a eliminar
+    cola.frente = cola.frente->siguiente;  // Movemos el frente al siguiente
+    cola.cantidad--;
+    
+    if (cola.frente == NULL) {  // Si la cola quedó vacía
+        cola.final = NULL;
+    }
+    
+    temp->siguiente = NULL;  // Desconectamos el proceso de la cola
+    return temp;  // Retornamos el proceso desencolado
+}
+
+// 5. Buscar un proceso en la cola por ID
+void BuscarEnCola(ColaProcesos cola, int id) {
+    if (cola.frente == NULL) {
+        cout << "La cola está vacía.\n";
+        return;
+    }
+
+    Proceso* actual = cola.frente;
+    bool encontrado = false;
+    
+    while (actual != NULL) {
+        if (actual->id == id) {
+            MostrarProceso(actual);
+            encontrado = true;
+            break;
+        }
+        actual = actual->siguiente;
+    }
+
+    if (!encontrado) {
+        cout << "Proceso no encontrado.\n";
+    }
+}
+
+// 6. Mostrar todos los procesos en la cola
+void MostrarCola(ColaProcesos cola) {
+    if (cola.frente == NULL) {
+        cout << "La cola está vacía.\n";
+        return;
+    }
+    
+    cout << "\n=== PROCESOS EN COLA ===\n";
+    Proceso* actual = cola.frente;
+    while (actual != NULL) {
+        MostrarProceso(actual);
+        actual = actual->siguiente;
+    }
+}
+
+// 7. Liberar memoria de la cola (eliminar todos los procesos)
+void LiberarCola(ColaProcesos &cola) {
+    while (cola.frente != NULL) {
+        Proceso* temp = DesencolarProceso(cola);
+        delete temp;  // Liberar memoria del proceso
+    }
+    cout << "Cola liberada correctamente.\n";
+}
+
+// *Menú de operaciones con colas*
+void MenuColas() {
+    ColaProcesos cola;
+    int ultimoId = 0;
+    int opcion;
+
+    do {
+        cout << "\n=== MENÚ DE COLAS ===";
+        cout << "\n1. Encolar proceso";
+        cout << "\n2. Desencolar proceso";
+        cout << "\n3. Buscar proceso por ID";
+        cout << "\n4. Mostrar todos los procesos";
+        cout << "\n5. Salir";
+        cout << "\nSeleccione opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1: {
+                Proceso* nuevo = CrearProceso(++ultimoId);
+                EncolarProceso(cola, nuevo);
+                break;
+            }
+            case 2: {
+                Proceso* desencolado = DesencolarProceso(cola);
+                if (desencolado != NULL) {
+                    cout << "Proceso desencolado:\n";
+                    MostrarProceso(desencolado);
+                    delete desencolado;  // Liberar memoria
+                }
+                break;
+            }
+            case 3: {
+                int id;
+                cout << "Ingrese ID a buscar: ";
+                cin >> id;
+                BuscarEnCola(cola, id);
+                break;
+            }
+            case 4: {
+                MostrarCola(cola);
+                break;
+            }
+            case 5: {
+                LiberarCola(cola);  // Limpiar memoria antes de salir
+                cout << "Saliendo del sistema...\n";
+                break;
+            }
+            default: {
+                cout << "Opción no válida.\n";
+                break;
+            }
+        }
+    } while (opcion != 5);
+}
+
+int main() {
+    MenuColas();
+    return 0;
+}
